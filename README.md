@@ -51,3 +51,6 @@ Hit this (POST) api http://localhost:5000/api/generate-csv (data loaded in db)
 
 ### 5. Start the Server
 node server.js or nodemon server.js
+
+### 5. Data Refresh
+For updating data immediately, uncomment the dataRefreshService.refreshDatabase(); or else it will get scheduled to midnight
