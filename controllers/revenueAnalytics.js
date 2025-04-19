@@ -118,7 +118,7 @@ const getTotalRevenueByCategory = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'products',  // Ensure this is the correct collection name
+          from: 'products', 
           let: { order_product_id: { $toString: '$product_id' } }, // Convert product_id to string
           pipeline: [
             {
@@ -152,7 +152,7 @@ const getTotalRevenueByCategory = async (req, res) => {
 
     sendResponse(res, true, revenueByCategory);
   } catch (err) {
-    console.error('Error calculating total revenue by category:', err);  // Log error for debugging
+    console.error('Error calculating total revenue by category:', err);
     sendResponse(res, false, null, 'Error calculating total revenue by category');
   }
 };
