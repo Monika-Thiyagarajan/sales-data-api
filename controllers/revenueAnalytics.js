@@ -1,4 +1,3 @@
-// Import the Order model
 const Order = require('../models/Order');
 
 // Helper function to standardize JSON responses
@@ -10,7 +9,7 @@ const sendResponse = (res, success, data = null, message = '') => {
   });
 };
 
-// Controller method for calculating total revenue
+// Method for calculating total revenue
 const getTotalRevenue = async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -44,7 +43,7 @@ const getTotalRevenue = async (req, res) => {
   }
 };
 
-// Controller method for sales by product
+// Method for sales by product
 const getSalesByProduct = async (req, res) => {
   try {
     const salesByProduct = await Order.aggregate([
@@ -62,7 +61,7 @@ const getSalesByProduct = async (req, res) => {
   }
 };
 
-// Controller method for total revenue by product
+// Method for total revenue by product
 const getTotalRevenueByProduct = async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -94,7 +93,7 @@ const getTotalRevenueByProduct = async (req, res) => {
   }
 };
 
-// Controller method for total revenue by category
+// Method for total revenue by category
 const getTotalRevenueByCategory = async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -126,7 +125,7 @@ const getTotalRevenueByCategory = async (req, res) => {
   }
 };
 
-// Controller method for total revenue by region
+// Method for total revenue by region
 const getTotalRevenueByRegion = async (req, res) => {
   const { startDate, endDate } = req.query;
 
@@ -158,7 +157,7 @@ const getTotalRevenueByRegion = async (req, res) => {
   }
 };
 
-// Controller method for revenue trends over time
+// Method for revenue trends over time
 const getRevenueTrends = async (req, res) => {
   const { startDate, endDate, period } = req.query; // period can be 'monthly', 'quarterly', 'yearly'
 
@@ -204,7 +203,6 @@ const getRevenueTrends = async (req, res) => {
   }
 };
 
-// Exporting the controller methods at the end
 module.exports = {
   getTotalRevenue,
   getSalesByProduct,

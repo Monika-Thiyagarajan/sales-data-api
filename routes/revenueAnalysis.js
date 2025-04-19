@@ -10,22 +10,22 @@ const {
 
 const router = express.Router();
 
-// Route to get total revenue within a date range
+// Get total revenue within a date range
 router.get('/revenue', getTotalRevenue);
 
-// Route to get sales by product
+// Get sales by product
 router.get('/sales-by-product', getSalesByProduct);
 
-// Route to get total revenue by product
+// Get total revenue by product
 router.get('/revenue-by-product', getTotalRevenueByProduct);
 
-// Route to get total revenue by category
+// Get total revenue by category
 router.get('/revenue-by-category', getTotalRevenueByCategory);
 
-// Route to get total revenue by region
+// Get total revenue by region
 router.get('/revenue-by-region', getTotalRevenueByRegion);
 
-// Route to get revenue trends over time
+// Get revenue trends over time
 router.get('/revenue-trends', getRevenueTrends);
 
 module.exports = router;

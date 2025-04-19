@@ -63,22 +63,19 @@ const refreshDatabase = async () => {
         // Insert/Update Customer
         let customer = await Customer.findOne({ customer_id: record.customerId });
         if (!customer) {
-          // Ensure all required fields are provided
           customer = await Customer.create({
-            customer_id: record.customerId,  // Ensure customer_id is passed
-            name: record.customerName,       // Ensure customerName is passed
-            email: record.customerEmail,     // Ensure customerEmail is passed
-            address: record.customerAddress, // Ensure customerAddress is passed
+            customer_id: record.customerId,  
+            name: record.customerName,     
+            email: record.customerEmail,    
+            address: record.customerAddress, 
           });
           logToFile('INFO', 'Inserted new customer', { customerId: record.customerId });
         } else {
-          // Check if the customer data has changed
           const customerChanged = customer.name !== record.customerName || 
                                   customer.email !== record.customerEmail || 
                                   customer.address !== record.customerAddress;
           
           if (customerChanged) {
-            // Perform update if data has changed
             customer.name = record.customerName;
             customer.email = record.customerEmail;
             customer.address = record.customerAddress;
@@ -89,7 +86,6 @@ const refreshDatabase = async () => {
           }
         }
   
-        // Insert/Update Product
         let product = await Product.findOne({ product_id: record.productId });
         if (!product) {
           product = await Product.create({
@@ -99,12 +95,10 @@ const refreshDatabase = async () => {
           });
           logToFile('INFO', 'Inserted new product', { productId: record.productId });
         } else {
-          // Check if the product data has changed
           const productChanged = product.product_name !== record.productName ||
                                  product.unit_price !== record.unitPrice;
           
           if (productChanged) {
-            // Perform update if data has changed
             product.product_name = record.productName;
             product.unit_price = record.unitPrice;
             await product.save();
@@ -114,7 +108,6 @@ const refreshDatabase = async () => {
           }
         }
   
-        // Create/Update Order
         const existingOrder = await Order.findOne({ order_id: record.orderId });
         const orderData = {
           order_id: record.orderId,
@@ -130,14 +123,12 @@ const refreshDatabase = async () => {
         };
   
         if (existingOrder) {
-          // Check if the order data has changed
           const orderChanged = existingOrder.quantity_sold !== record.quantitySold ||
                                existingOrder.unit_price !== record.unitPrice ||
                                existingOrder.discount !== record.discount ||
                                existingOrder.shipping_cost !== record.shippingCost;
   
           if (orderChanged) {
-            // Perform update if data has changed
             await Order.updateOne({ order_id: record.orderId }, { $set: orderData });
             logToFile('INFO', 'Updated order', { orderId: record.orderId });
           } else {
@@ -159,6 +150,7 @@ const refreshDatabase = async () => {
 };
 
   
+//It runs every day at exactly 12:00 AM (midnight).
 const scheduleDataRefresh = () => {
   cron.schedule('0 0 * * *', () => {
     refreshDatabase();

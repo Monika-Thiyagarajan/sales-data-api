@@ -27,8 +27,10 @@ const validateRowData = (row) => {
     errors.push(requiredField(row['Customer Name'], 'Customer Name'));
     errors.push(validEmail(row['Customer Email']));
     errors.push(requiredField(row['Customer Address'], 'Customer Address'));
-    return errors.filter(Boolean); // remove nulls
+    return errors.filter(Boolean);
 };
+
+
 
 // Inserting a row into DB
 const insertDataToDB = async (row) => {
