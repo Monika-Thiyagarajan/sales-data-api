@@ -1,4 +1,4 @@
-# Revenue Analytics System
+# Sales Analytics
 
 This system provides a complete solution for processing, storing, and analyzing historical sales data. The data is loaded from a CSV file containing various fields such as product information, customer details, and sale transactions. The system includes a mechanism for periodic data refresh, a normalized database schema, and a RESTful API for querying various revenue-related metrics.
 
