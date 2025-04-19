@@ -18,10 +18,10 @@ const getTotalRevenue = async (req, res) => {
   }
 
   try {
-    const totalRevenue = await Order.aggregate([
+    const totalRevenueResult = await Order.aggregate([
       {
         $match: {
-          dateOfSale: {
+          date_of_sale: {
             $gte: new Date(startDate),
             $lte: new Date(endDate),
           },
@@ -30,18 +30,23 @@ const getTotalRevenue = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: { $multiply: ['$quantitySold', '$unitPrice'] } },
+          totalRevenue: { $sum: { $multiply: ['$quantity_sold', '$unit_price'] } },
         },
       },
     ]);
 
+    // If no revenue data is found, default to 0
+    const totalRevenue = totalRevenueResult.length > 0 ? totalRevenueResult[0].totalRevenue : 0;
+
     sendResponse(res, true, {
-      totalRevenue: totalRevenue[0] ? totalRevenue[0].totalRevenue : 0,
+      totalRevenue,
     });
   } catch (err) {
+    console.error('Error calculating total revenue:', err); // Log the error for debugging
     sendResponse(res, false, null, 'Error calculating total revenue');
   }
 };
+
 
 // Method for sales by product
 const getSalesByProduct = async (req, res) => {
@@ -50,7 +55,7 @@ const getSalesByProduct = async (req, res) => {
       {
         $group: {
           _id: '$productName',
-          totalSales: { $sum: { $multiply: ['$quantitySold', '$unitPrice'] } },
+          totalSales: { $sum: { $multiply: ['$quantity_sold', '$unit_price'] } },
         },
       },
     ]);
@@ -73,7 +78,7 @@ const getTotalRevenueByProduct = async (req, res) => {
     const revenueByProduct = await Order.aggregate([
       {
         $match: {
-          dateOfSale: {
+          date_of_sale: {
             $gte: new Date(startDate),
             $lte: new Date(endDate),
           },
@@ -82,7 +87,7 @@ const getTotalRevenueByProduct = async (req, res) => {
       {
         $group: {
           _id: '$productName',
-          totalRevenue: { $sum: { $multiply: ['$quantitySold', '$unitPrice'] } },
+          totalRevenue: { $sum: { $multiply: ['$quantity_sold', '$unit_price'] } },
         },
       },
     ]);
@@ -105,25 +110,54 @@ const getTotalRevenueByCategory = async (req, res) => {
     const revenueByCategory = await Order.aggregate([
       {
         $match: {
-          dateOfSale: {
-            $gte: new Date(startDate),
+          date_of_sale: { 
+            $gte: new Date(startDate), 
             $lte: new Date(endDate),
           },
         },
       },
       {
+        $lookup: {
+          from: 'products',  // Ensure this is the correct collection name
+          let: { order_product_id: { $toString: '$product_id' } }, // Convert product_id to string
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$product_id', '$$order_product_id'] }, // Compare string product_id
+              },
+            },
+          ],
+          as: 'product',  // Alias for the joined data
+        },
+      },
+      {
+        $unwind: {
+          path: '$product',
+          preserveNullAndEmptyArrays: true, // This will preserve orders with no matching product
+        },
+      },
+      {
         $group: {
-          _id: '$category',
-          totalRevenue: { $sum: { $multiply: ['$quantitySold', '$unitPrice'] } },
+          _id: '$product.category',  // Group by the product category from the Product collection
+          totalRevenue: { 
+            $sum: { $multiply: ['$quantity_sold', '$unit_price'] }  // Calculate total revenue
+          },
         },
       },
     ]);
 
+    if (revenueByCategory.length === 0) {
+      console.log('No data found for the given date range or categories.');
+    }
+
     sendResponse(res, true, revenueByCategory);
   } catch (err) {
+    console.error('Error calculating total revenue by category:', err);  // Log error for debugging
     sendResponse(res, false, null, 'Error calculating total revenue by category');
   }
 };
+
+
 
 // Method for total revenue by region
 const getTotalRevenueByRegion = async (req, res) => {
@@ -137,7 +171,7 @@ const getTotalRevenueByRegion = async (req, res) => {
     const revenueByRegion = await Order.aggregate([
       {
         $match: {
-          dateOfSale: {
+          date_of_sale: {
             $gte: new Date(startDate),
             $lte: new Date(endDate),
           },
@@ -146,7 +180,7 @@ const getTotalRevenueByRegion = async (req, res) => {
       {
         $group: {
           _id: '$region',
-          totalRevenue: { $sum: { $multiply: ['$quantitySold', '$unitPrice'] } },
+          totalRevenue: { $sum: { $multiply: ['$quantity_sold', '$unit_price'] } },
         },
       },
     ]);
@@ -168,11 +202,11 @@ const getRevenueTrends = async (req, res) => {
   try {
     let groupBy = {};
     if (period === 'monthly') {
-      groupBy = { $month: '$dateOfSale' }; // Group by month
+      groupBy = { $month: '$date_of_sale' }; // Group by month
     } else if (period === 'quarterly') {
-      groupBy = { $ceil: { $divide: [{ $month: '$dateOfSale' }, 3] } }; // Group by quarter
+      groupBy = { $ceil: { $divide: [{ $month: '$date_of_sale' }, 3] } }; // Group by quarter
     } else if (period === 'yearly') {
-      groupBy = { $year: '$dateOfSale' }; // Group by year
+      groupBy = { $year: '$date_of_sale' }; // Group by year
     } else {
       return sendResponse(res, false, null, 'Invalid period, choose from monthly, quarterly, or yearly');
     }
@@ -180,7 +214,7 @@ const getRevenueTrends = async (req, res) => {
     const revenueTrends = await Order.aggregate([
       {
         $match: {
-          dateOfSale: {
+          date_of_sale: {
             $gte: new Date(startDate),
             $lte: new Date(endDate),
           },
@@ -189,7 +223,7 @@ const getRevenueTrends = async (req, res) => {
       {
         $group: {
           _id: groupBy,
-          totalRevenue: { $sum: { $multiply: ['$quantitySold', '$unitPrice'] } },
+          totalRevenue: { $sum: { $multiply: ['$quantity_sold', '$unit_price'] } },
         },
       },
       {
